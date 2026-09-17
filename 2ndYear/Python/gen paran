@@ -1,0 +1,55 @@
+#include <stdlib.h>
+#include <string.h>
+
+// Helper function to perform backtracking and find valid combinations
+void backtrack(int n, int open, int close, char* current, int index, 
+               char*** result, int* capacity, int* returnSize) {
+    
+    // Base Case: A valid combination of length 2*n is formed
+    if (index == 2 * n) {
+        current[index] = '\0'; // Null-terminate the string
+        
+        // Dynamically double the result array capacity if it's full
+        if (*returnSize >= *capacity) {
+            *capacity *= 2;
+            *result = (char**)realloc(*result, (*capacity) * sizeof(char*));
+        }
+        
+        // Allocate space for the current string and copy it over
+        (*result)[*returnSize] = (char*)malloc((2 * n + 1) * sizeof(char));
+        strcpy((*result)[*returnSize], current);
+        (*returnSize)++;
+        return;
+    }
+    
+    // Choice 1: Add an opening parenthesis if we haven't reached the limit 'n'
+    if (open < n) {
+        current[index] = '(';
+        backtrack(n, open + 1, close, current, index + 1, result, capacity, returnSize);
+    }
+    
+    // Choice 2: Add a closing parenthesis if it matches a previously opened one
+    if (close < open) {
+        current[index] = ')';
+        backtrack(n, open, close + 1, current, index + 1, result, capacity, returnSize);
+    }
+}
+
+char** generateParenthesis(int n, int* returnSize) {
+    *returnSize = 0;
+    int capacity = 50; // Initial arbitrary capacity for results array
+    
+    // Allocate initial result array
+    char** result = (char**)malloc(capacity * sizeof(char*));
+    
+    // Temporary buffer to build each individual valid parenthesis string
+    char* current = (char*)malloc((2 * n + 1) * sizeof(char));
+    
+    // Start the backtracking recursion
+    backtrack(n, 0, 0, current, 0, &result, &capacity, returnSize);
+    
+    // Free the temporary buffer
+    free(current);
+    
+    return result;
+}
